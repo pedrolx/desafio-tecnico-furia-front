@@ -17,7 +17,7 @@ export const Chat = ({ username }) => {
 
     /* Estabelece a conexão com o backend */
     useEffect(() => {
-        ws.current = new WebSocket("ws://localhost:3001");
+        ws.current = new WebSocket(API_CONFIG.WS_URL);
 
         ws.current.onmessage = (event) => {
             const mensagemRecebida = event.data;
@@ -28,6 +28,11 @@ export const Chat = ({ username }) => {
             if (!mensagemRecebida.startsWith(`${username}:`)) {
                 setarMensagens((prev) => [...prev, mensagemRecebida]);
             }
+        };
+
+        ws.current.onerror = (error) => {
+            console.error("Erro no WebSocket:", error);
+            setarMensagens(prev => [...prev, "Erro na conexão do chat"]);
         };
 
         return () => {
