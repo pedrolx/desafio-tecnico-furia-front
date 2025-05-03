@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { API_CONFIG } from "../config";
 
 export const Chat = ({ username }) => {
     /* Array com todas as mensagens do chat (Sem DB para manter histórico) */
@@ -8,7 +9,11 @@ export const Chat = ({ username }) => {
     const [input, setarInput] = useState("");
 
     /* WebSocket */
-    const ws = useRef(null);
+    const WS_URL = import.meta.env.PROD
+        ? 'https://desafio-tecnico-furia-back.onrender.com'
+        : 'ws://localhost:3001/ws';
+
+    const ws = useRef(new WebSocket(WS_URL));
 
     /* Estabelece a conexão com o backend */
     useEffect(() => {
@@ -35,15 +40,20 @@ export const Chat = ({ username }) => {
     /* Usa a requisição POST do backend e adiciona a mensagem ao chat */
     const perguntarParaIA = async (pergunta) => {
         try {
-            const resposta = await fetch("http://localhost:3002/perguntar-ia", {
+            const resposta = await fetch(`${API_CONFIG.baseURL}/perguntar-ia`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: pergunta }),
+                body: JSON.stringify({ question: pergunta })
             });
+
+            if (!resposta.ok) throw new Error('API response error');
+
             const data = await resposta.json();
-            setarMensagens((prev) => [...prev, `IA FURIA: ${data.answer}`]);
+            return `IA FURIA: ${data.answer}`;
+
         } catch (error) {
-            setarMensagens((prev) => [...prev, "IA FURIA: Erro ao buscar resposta."]);
+            console.error("Erro na IA:", error);
+            return "IA FURIA: Estou com problemas técnicos, tente novamente!";
         }
     };
 
