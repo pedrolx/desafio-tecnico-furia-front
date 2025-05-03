@@ -8,16 +8,11 @@ export const Chat = ({ username }) => {
     /* Armazena o texto que o usuario no chat digita */
     const [input, setarInput] = useState("");
 
-    /* WebSocket */
-    const WS_URL = import.meta.env.PROD
-        ? 'https://desafio-tecnico-furia-back.onrender.com'
-        : 'ws://localhost:3001/ws';
-
     const ws = useRef(new WebSocket(WS_URL));
 
     /* Estabelece a conexão com o backend */
     useEffect(() => {
-        ws.current = new WebSocket("ws://localhost:3001");
+        ws.current = new WebSocket(API_CONFIG.WS_URL);
 
         ws.current.onmessage = (event) => {
             const mensagemRecebida = event.data;
@@ -28,6 +23,11 @@ export const Chat = ({ username }) => {
             if (!mensagemRecebida.startsWith(`${username}:`)) {
                 setarMensagens((prev) => [...prev, mensagemRecebida]);
             }
+        };
+
+        ws.current.onerror = (error) => {
+            console.error("Erro no WebSocket:", error);
+            setarMensagens(prev => [...prev, "Erro na conexão do chat"]);
         };
 
         return () => {
