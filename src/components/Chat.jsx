@@ -45,20 +45,31 @@ export const Chat = ({ username }) => {
     /* Usa a requisição POST do backend e adiciona a mensagem ao chat */
     const perguntarParaIA = async (pergunta) => {
         try {
-            const resposta = await fetch(`${API_CONFIG.IA_URL}/perguntar-ia`, {
+            if (!API_CONFIG.baseURL) {
+                throw new Error('URL da API não configurada');
+            }
+
+            const resposta = await fetch(`${API_CONFIG.baseURL}/perguntar-ia`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question: pergunta })
             });
 
-            if (!resposta.ok) throw new Error('API response error');
+            if (!resposta.ok) {
+                const errorData = await resposta.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP ${resposta.status}`);
+            }
 
             const data = await resposta.json();
             return `IA FURIA: ${data.answer}`;
 
         } catch (error) {
-            console.error("Erro na IA:", error);
-            return "IA FURIA: Estou com problemas técnicos, tente novamente!";
+            console.error("Erro detalhado:", {
+                error: error.message,
+                urlUsed: `${API_CONFIG.baseURL}/perguntar-ia`,
+                env: import.meta.env
+            });
+            return "IA FURIA: Estou tendo problemas técnicos. Tente novamente mais tarde!";
         }
     };
 
