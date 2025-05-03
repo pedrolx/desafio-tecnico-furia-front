@@ -6,4 +6,5 @@ export const API_CONFIG = {
       return this.baseURL.replace('http', 'ws') + this.wsPath;
     },
     wsPath: '/ws'
+
   };

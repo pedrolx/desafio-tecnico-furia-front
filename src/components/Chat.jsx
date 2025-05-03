@@ -8,7 +8,12 @@ export const Chat = ({ username }) => {
     /* Armazena o texto que o usuario no chat digita */
     const [input, setarInput] = useState("");
 
-    const ws = useRef(new WebSocket(WS_URL));
+    /* WebSocket */
+    const WS_URL = import.meta.env.PROD
+        ? 'wss://desafio-tecnico-furia-back.onrender.com/furia-chat'
+        : 'ws://localhost:3001/furia-chat';
+
+    const ws = useRef(new WebSocket(API_CONFIG.WS_URL));
 
     /* Estabelece a conexão com o backend */
     useEffect(() => {
@@ -40,7 +45,7 @@ export const Chat = ({ username }) => {
     /* Usa a requisição POST do backend e adiciona a mensagem ao chat */
     const perguntarParaIA = async (pergunta) => {
         try {
-            const resposta = await fetch(`${API_CONFIG.baseURL}/perguntar-ia`, {
+            const resposta = await fetch(`${API_CONFIG.IA_URL}/perguntar-ia`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question: pergunta })
