@@ -8,6 +8,35 @@ export const Chat = ({ username }) => {
     /* Armazena o texto que o usuario no chat digita */
     const [input, setarInput] = useState("");
 
+    /* Controle para Scroll do Chat */
+
+    const mensagensRef = useRef(null);
+    const [mostrarAviso, setMostrarAviso] = useState(false);
+
+    const scrollParaFim = () => {
+        mensagensRef.current?.scrollTo({ top: mensagensRef.current.scrollHeight, behavior: 'smooth' });
+    };
+
+    const handleScroll = () => {
+        const el = mensagensRef.current;
+        if (!el) return;
+
+        const estaNoFim = el.scrollHeight - el.scrollTop <= el.clientHeight + 10;
+        setMostrarAviso(!estaNoFim);
+    };
+
+    useEffect(() => {
+        const el = mensagensRef.current;
+        if (!el) return;
+
+        const estaNoFim = el.scrollHeight - el.scrollTop <= el.clientHeight + 10;
+        if (estaNoFim) {
+            scrollParaFim();
+        } else {
+            setMostrarAviso(true);
+        }
+    }, [mensagens]);
+
     /* WebSocket */
     const WS_URL = import.meta.env.PROD
         ? 'wss://desafio-tecnico-furia-back.onrender.com/furia-chat'
@@ -83,7 +112,7 @@ export const Chat = ({ username }) => {
             setarMensagens((prev) => [...prev, `${username}: ${input}`]);
             perguntarParaIA(pergunta).then(resposta => {
                 setarMensagens((prev) => [...prev, resposta]);
-              });
+            });
             setarInput("");
             return;
         }
@@ -101,7 +130,7 @@ export const Chat = ({ username }) => {
         <div className="chat-container">
             <h2>Chat da Torcida 🗣️</h2>
 
-            <div className="chat-messages">
+            <div className="chat-messages" ref={mensagensRef} onScroll={handleScroll}>
                 {mensagens.map((msg, i) => {
                     let estilo = "msg-padrao";
                     if (msg.startsWith("IA FURIA:")) estilo = "msg-ia";
@@ -114,6 +143,12 @@ export const Chat = ({ username }) => {
                     );
                 })}
             </div>
+
+            {mostrarAviso && (
+                <div className="nova-msg-alerta" onClick={scrollParaFim}>
+                    Nova mensagem ↓
+                </div>
+            )}
 
             <div className="chat-input-container">
                 <input
