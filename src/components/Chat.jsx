@@ -81,7 +81,9 @@ export const Chat = ({ username }) => {
         if (input.startsWith("/ia ")) {
             const pergunta = input.replace("/ia", "").trim();
             setarMensagens((prev) => [...prev, `${username}: ${input}`]);
-            perguntarParaIA(pergunta);
+            perguntarParaIA(pergunta).then(resposta => {
+                setarMensagens((prev) => [...prev, resposta]);
+              });
             setarInput("");
             return;
         }

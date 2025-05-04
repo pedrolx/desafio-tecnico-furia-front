@@ -5,6 +5,6 @@ export const API_CONFIG = {
                : "http://localhost:3002"),
     
     get WS_URL() {
-      return this.baseURL.replace('http', 'ws') + '/ws';
+      return this.baseURL.replace('http', 'ws') + '/furia-chat';
     }
   };
